@@ -6,7 +6,7 @@ A collection of simple and interactive games built with JavaScript.
 
 | Game Name       | Game Preview                                  |
 |-----------------|-----------------------------------------------|
-| Tic-Tac-Toe    | ![Tic-Tac-Toe](https://github.com/soumadip-dev/JS-Games/blob/main/TicTacToe/Images/game.png) |
+| TicTacToe Game    | ![Tic-Tac-Toe](https://github.com/soumadip-dev/JS-Games/blob/main/TicTacToe/Images/game.png) |
 | Snake Game      | ![Snake Game](https://github.com/soumadip-dev/JS-Games/blob/main/TicTacToe/Images/game.png)       |
 | Game 3          | ![Game 3](https://github.com/soumadip-dev/JS-Games/blob/main/TicTacToe/Images/game.png)              |
 
