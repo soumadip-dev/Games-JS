@@ -1,4 +1,4 @@
-# JS-Games
+# Games-JS
 
 A collection of simple and interactive games built with JavaScript.
 
