@@ -6,7 +6,7 @@
 
 <div align="center">
   <a href="https://github.com/kavindu-dilshan">
-    <img src="https://skillicons.dev/icons?i=html,css,js,vscode,github" alt="Tech Stack" width="250" style="padding: 15px 0">
+    <img src="https://skillicons.dev/icons?i=html,css,js,github" alt="Tech Stack" width="180" style="padding: 15px 0">
   </a>
 </div>
 
