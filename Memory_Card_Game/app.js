@@ -47,11 +47,14 @@ const imagesLinkArray = [
   },
 ];
 const duplicateCards = imagesLinkArray.concat(imagesLinkArray);
-const shuffleCards = duplicateCards.shuffleArray();
+let shuffleCards = duplicateCards.shuffleArray();
+
 
 ////// Dom Elements
 const cardContainer = document.getElementById('gameContainer');
 const movesCount = document.getElementById('moves');
+const timeCount = document.getElementById('time');
+const restartBtn = document.getElementById('restart-game')
 
 ////// Global variable
 let firstCard = null;
@@ -67,6 +70,7 @@ function createCard({ url, name }) {
   card.classList.add('card');
   card.setAttribute('data-name', name); // Store name as attribute
   frontCard.classList.add('card-front');
+  frontCard.textContent = '?';
   backCard.classList.add('card-back');
   backCard.innerHTML = `<img src="${url}" alt="${name}">`;
 
@@ -78,11 +82,14 @@ function createCard({ url, name }) {
   return card;
 }
 
-shuffleCards.forEach(card => {
-  cardContainer.appendChild(createCard(card));
-});
+function addCardToDom(){
+  shuffleCards.forEach(card => {
+    cardContainer.appendChild(createCard(card));
+  });
+}
 
 function handleCardClick(card) {
+
   if (matchCards.includes(card)) {
     return;
   }
@@ -92,6 +99,7 @@ function handleCardClick(card) {
     firstCard = card;
   } else {
     secondCard = card;
+    moveCount++;
     if (
       firstCard.getAttribute('data-name') ===
       secondCard.getAttribute('data-name')
@@ -104,6 +112,7 @@ function handleCardClick(card) {
             `Congratulations! You completed the game in ${moveCount} moves.`
           );
         }, 0);
+
       }
     } else {
       setTimeout(() => {
@@ -112,10 +121,7 @@ function handleCardClick(card) {
         resetSelection();
       }, 500);
     }
-    moveCount++;
-    setTimeout(() => {
-      movesCount.textContent = `${moveCount}`;
-    }, 0);
+    movesCount.textContent = `${moveCount}`;
   }
 }
 
@@ -123,3 +129,23 @@ function resetSelection() {
   firstCard = null;
   secondCard = null;
 }
+function restartGame() {
+  // Reset game variables
+  matchCards=[];
+  moveCount = 0;
+  firstCard = null;
+  secondCard = null;
+
+  movesCount.textContent = `${moveCount}`;
+
+  cardContainer.innerHTML = '';
+  shuffleCards = duplicateCards.shuffleArray();
+
+  addCardToDom();
+
+}
+
+
+addCardToDom();
+restartBtn.addEventListener('click', restartGame);
+
