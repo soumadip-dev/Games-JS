@@ -1,18 +1,19 @@
-Array.prototype.shuffleArray = function () {
-  let currentIndex = this.length,
+// Shuffle the array using Fisher-Yates algorithm
+function shuffleArray(array) {
+  let currentIndex = array.length,
     randomIndex,
     tempValue;
-
   while (currentIndex-- > 0) {
     randomIndex = Math.floor(Math.random() * (currentIndex + 1));
-    tempValue = this[randomIndex];
-    this[randomIndex] = this[currentIndex];
-    this[currentIndex] = tempValue;
+    tempValue = array[randomIndex];
+    array[randomIndex] = array[currentIndex];
+    array[currentIndex] = tempValue;
   }
+  return array;
+}
 
-  return this;
-};
-const imagesLinkArray = [
+// Image dataset for the memory game
+const imageCards = [
   {
     name: 'Angular',
     url: 'https://media.geeksforgeeks.org/wp-content/uploads/20231122102833/AngularImage.png',
@@ -37,115 +38,141 @@ const imagesLinkArray = [
     name: 'CSS',
     url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyfXdKH7SrCVpLx-h0j9VSLf7LQxwWgptJNw&s',
   },
-  {
-    name: 'Python',
-    url: 'https://freesvg.org/img/387.png',
-  },
+  { name: 'Python', url: 'https://freesvg.org/img/387.png' },
   {
     name: 'Java',
     url: 'https://logo-download.com/wp-content/data/images/png/Java-logo.png',
   },
 ];
-const duplicateCards = imagesLinkArray.concat(imagesLinkArray);
-let shuffleCards = duplicateCards.shuffleArray();
 
+const duplicateCards = imageCards.concat(imageCards);
+let shuffledCards = shuffleArray(duplicateCards);
 
-////// Dom Elements
-const cardContainer = document.getElementById('gameContainer');
-const movesCount = document.getElementById('moves');
-const timeCount = document.getElementById('time');
-const restartBtn = document.getElementById('restart-game')
+// DOM Elements
+const gameBoard = document.getElementById('gameContainer');
+const moveCounter = document.getElementById('moves');
+const timeDisplay = document.getElementById('time');
+const restartButton = document.getElementById('restart-game');
 
-////// Global variable
-let firstCard = null;
-let secondCard = null;
-let matchCards = [];
-let moveCount = 0;
+// Game State Variables
+let firstSelectedCard = null;
+let secondSelectedCard = null;
+let matchedCards = [];
+let totalMoves = 0;
+let timerInterval;
+let isTimerRunning = false;
 
+// Create and return a card element
 function createCard({ url, name }) {
-  const frontCard = document.createElement('div');
-  const backCard = document.createElement('div');
   const card = document.createElement('div');
-
   card.classList.add('card');
-  card.setAttribute('data-name', name); // Store name as attribute
-  frontCard.classList.add('card-front');
-  frontCard.textContent = '?';
-  backCard.classList.add('card-back');
-  backCard.innerHTML = `<img src="${url}" alt="${name}">`;
+  card.setAttribute('data-name', name);
 
-  card.appendChild(frontCard);
-  card.appendChild(backCard);
+  const frontFace = document.createElement('div');
+  frontFace.classList.add('card-front');
+  frontFace.textContent = '?';
+
+  const backFace = document.createElement('div');
+  backFace.classList.add('card-back');
+  backFace.innerHTML = `<img src="${url}" alt="${name}">`;
+
+  card.appendChild(frontFace);
+  card.appendChild(backFace);
 
   card.addEventListener('click', () => handleCardClick(card));
 
   return card;
 }
 
-function addCardToDom(){
-  shuffleCards.forEach(card => {
-    cardContainer.appendChild(createCard(card));
+// Populate the game board with shuffled cards
+function renderGameBoard() {
+  gameBoard.innerHTML = '';
+  shuffledCards.forEach(card => {
+    gameBoard.appendChild(createCard(card));
   });
 }
 
+// Start the game timer
+function startGameTimer() {
+  if (isTimerRunning) return;
+  let elapsedTime = 0;
+  isTimerRunning = true;
+  timerInterval = setInterval(() => {
+    elapsedTime++;
+    const minutes = Math.floor(elapsedTime / 60);
+    const seconds = elapsedTime % 60;
+    timeDisplay.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+  }, 1000);
+}
+
+// Stop the game timer
+function stopGameTimer() {
+  clearInterval(timerInterval);
+}
+
+// Handle card click event
 function handleCardClick(card) {
+  startGameTimer();
+  if (matchedCards.includes(card) || card === firstSelectedCard) return;
 
-  if (matchCards.includes(card)) {
-    return;
-  }
-  if (card === firstCard) return;
   card.classList.add('flipped');
-  if (firstCard === null) {
-    firstCard = card;
-  } else {
-    secondCard = card;
-    moveCount++;
-    if (
-      firstCard.getAttribute('data-name') ===
-      secondCard.getAttribute('data-name')
-    ) {
-      matchCards.push(firstCard, secondCard);
-      resetSelection();
-      if (matchCards.length === 16) {
-        setTimeout(() => {
-          alert(
-            `Congratulations! You completed the game in ${moveCount} moves.`
-          );
-        }, 0);
 
-      }
-    } else {
-      setTimeout(() => {
-        firstCard.classList.remove('flipped');
-        secondCard.classList.remove('flipped');
-        resetSelection();
-      }, 500);
-    }
-    movesCount.textContent = `${moveCount}`;
+  if (!firstSelectedCard) {
+    firstSelectedCard = card;
+  } else {
+    secondSelectedCard = card;
+    totalMoves++;
+    moveCounter.textContent = `${totalMoves}`;
+    checkForMatch();
   }
 }
 
-function resetSelection() {
-  firstCard = null;
-  secondCard = null;
+// Check if the two selected cards match
+function checkForMatch() {
+  if (
+    firstSelectedCard.getAttribute('data-name') ===
+    secondSelectedCard.getAttribute('data-name')
+  ) {
+    matchedCards.push(firstSelectedCard, secondSelectedCard);
+    resetCardSelection();
+    if (matchedCards.length === duplicateCards.length) {
+      stopGameTimer();
+      setTimeout(() => {
+        alert(
+          `Well done! You completed the game in ${totalMoves} moves and a time of ${timeDisplay.textContent}.`
+        );
+        resetGame();
+      }, 0);
+    }
+  } else {
+    setTimeout(() => {
+      firstSelectedCard.classList.remove('flipped');
+      secondSelectedCard.classList.remove('flipped');
+      resetCardSelection();
+    }, 500);
+  }
 }
-function restartGame() {
-  // Reset game variables
-  matchCards=[];
-  moveCount = 0;
-  firstCard = null;
-  secondCard = null;
 
-  movesCount.textContent = `${moveCount}`;
-
-  cardContainer.innerHTML = '';
-  shuffleCards = duplicateCards.shuffleArray();
-
-  addCardToDom();
-
+// Reset selected card variables
+function resetCardSelection() {
+  firstSelectedCard = null;
+  secondSelectedCard = null;
 }
 
+// Reset and restart the game
+function resetGame() {
+  matchedCards = [];
+  totalMoves = 0;
+  firstSelectedCard = null;
+  secondSelectedCard = null;
+  stopGameTimer();
+  isTimerRunning = false;
+  timeDisplay.textContent = `0:00`;
+  moveCounter.textContent = `${totalMoves}`;
+  shuffledCards = shuffleArray(duplicateCards);
+  renderGameBoard();
+}
 
-addCardToDom();
-restartBtn.addEventListener('click', restartGame);
-
+// Initialize the game
+renderGameBoard();
+restartButton.addEventListener('click', resetGame);
